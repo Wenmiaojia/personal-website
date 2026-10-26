@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Wenmiao Jia</title>
+<meta name="description" content="Wenmiao Jia — computer engineering student at UW–Madison researching GNSS signals for atmospheric sensing.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #F6F8FB;
+    --ink: #18212E;
+    --muted: #586476;
+    --rule: #D9DFE7;
+    --accent: #2B6A8A;
+    --orbit: #A9B7C8;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #0E1622;
+      --ink: #E3E9F1;
+      --muted: #97A4B5;
+      --rule: #233042;
+      --accent: #7DB6D3;
+      --orbit: #3A4B61;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #0E1622;
+    --ink: #E3E9F1;
+    --muted: #97A4B5;
+    --rule: #233042;
+    --accent: #7DB6D3;
+    --orbit: #3A4B61;
+    color-scheme: dark;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "Newsreader", Georgia, "Times New Roman", serif;
+    font-size: 1.125rem;
+    line-height: 1.65;
+    font-optical-sizing: auto;
+    padding: env(safe-area-inset-top, 0px) 0 env(safe-area-inset-bottom, 0px);
+  }
+  main { max-width: 42rem; margin: 0 auto; padding: 4.5rem 1.5rem 3rem; }
+
+  a { color: var(--accent); text-decoration-thickness: 1px; text-underline-offset: 0.18em; }
+  a:hover { text-decoration-thickness: 2px; }
+  a:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 2px; }
+
+  /* Hero */
+  .hero { display: grid; grid-template-columns: 1fr 11rem; gap: 2rem; align-items: center; }
+  h1 {
+    font-size: clamp(2.5rem, 7vw, 3.5rem);
+    font-weight: 500;
+    line-height: 1.05;
+    letter-spacing: -0.015em;
+    margin: 0 0 1rem;
+  }
+  .lede { font-size: 1.25rem; line-height: 1.5; margin: 0 0 0.75rem; }
+  .degree { color: var(--muted); margin: 0 0 1.25rem; }
+  .links { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 0.4rem 1.25rem; }
+
+  figure { margin: 0; }
+  .skyplot { width: 100%; height: auto; display: block; }
+  .skyplot .ring { fill: none; stroke: var(--rule); stroke-width: 1; }
+  .skyplot .axis { stroke: var(--rule); stroke-width: 1; }
+  .skyplot .card { fill: var(--muted); font: 500 10px "Newsreader", Georgia, serif; }
+  .skyplot .track { fill: none; stroke: var(--orbit); stroke-width: 1.5; stroke-linecap: round; }
+  .skyplot .sat { fill: var(--ink); }
+  .skyplot .sat.on { fill: var(--accent); }
+  figcaption { font-size: 0.85rem; line-height: 1.4; color: var(--muted); margin-top: 0.5rem; }
+
+  /* Sections */
+  section { border-top: 1px solid var(--rule); margin-top: 3.25rem; padding-top: 1.75rem; }
+  h2 { font-size: 1.45rem; font-weight: 600; line-height: 1.25; margin: 0 0 1rem; }
+  h3 { font-size: 1.125rem; font-weight: 600; margin: 1.75rem 0 0.25rem; }
+  h3 + .meta { margin-top: 0; }
+  .meta { color: var(--muted); font-style: italic; margin: 0 0 0.6rem; }
+  p { margin: 0 0 1rem; }
+  ul.points { margin: 0 0 1rem; padding-left: 1.2rem; }
+  ul.points li { margin-bottom: 0.5rem; }
+  ul.points li::marker { color: var(--muted); }
+  .demo { margin-top: 1.25rem; }
+
+  dl.honors { margin: 0; display: grid; grid-template-columns: 1fr auto; gap: 0.55rem 1.5rem; }
+  dl.honors dt { margin: 0; }
+  dl.honors dd { margin: 0; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+  footer { max-width: 42rem; margin: 0 auto; padding: 0 1.5rem 3rem; color: var(--muted); font-size: 0.9rem; }
+
+  @media (max-width: 40rem) {
+    main { padding-top: 3rem; }
+    .hero { grid-template-columns: 1fr; }
+    .hero figure { order: -1; width: 9rem; }
+  }
+
+  /* One orchestrated moment: satellite tracks draw in on load */
+  @media (prefers-reduced-motion: no-preference) {
+    .skyplot .track { stroke-dasharray: 60; stroke-dashoffset: 60; animation: draw 1.4s ease-out forwards; }
+    .skyplot .sat { opacity: 0; animation: appear 0.4s ease-out forwards; }
+    .skyplot g:nth-of-type(2) * { animation-delay: 0.15s; }
+    .skyplot g:nth-of-type(3) * { animation-delay: 0.3s; }
+    .skyplot g:nth-of-type(4) * { animation-delay: 0.45s; }
+    .skyplot g:nth-of-type(5) * { animation-delay: 0.6s; }
+    .skyplot g:nth-of-type(6) * { animation-delay: 0.75s; }
+    .skyplot .sat { animation-delay: 1.1s !important; }
+  }
+  @keyframes draw { to { stroke-dashoffset: 0; } }
+  @keyframes appear { to { opacity: 1; } }
+</style>
+</head>
+<body>
+<main>
+
+  <header class="hero">
+    <div>
+      <h1>Wenmiao Jia</h1>
+      <p class="lede">Computer engineering student at the University of Wisconsin–Madison, using satellite navigation signals to measure the atmosphere.</p>
+      <p class="degree">B.S. Computer Engineering, expected May 2028</p>
+      <ul class="links">
+        <li><a href="mailto:wenmiaojiapro@gmail.com">Email</a></li>
+        <li><a href="https://github.com/wenmiaojia">GitHub</a></li>
+        <li><a href="https://linkedin.com/in/wenmiaojia">LinkedIn</a></li>
+        <li><a href="cv.pdf">CV</a></li>
+      </ul>
+    </div>
+    <figure>
+      <svg class="skyplot" viewBox="0 0 200 200" role="img" aria-labelledby="skyplot-title">
+        <title id="skyplot-title">A GNSS skyplot showing six satellites by direction and elevation</title>
+        <circle class="ring" cx="100" cy="100" r="90"/>
+        <circle class="ring" cx="100" cy="100" r="60"/>
+        <circle class="ring" cx="100" cy="100" r="30"/>
+        <line class="axis" x1="100" y1="10" x2="100" y2="190"/>
+        <line class="axis" x1="10" y1="100" x2="190" y2="100"/>
+        <text class="card" x="100" y="7" text-anchor="middle">N</text>
+        <text class="card" x="196" y="103.5" text-anchor="middle">E</text>
+        <text class="card" x="100" y="199" text-anchor="middle">S</text>
+        <text class="card" x="4" y="103.5" text-anchor="middle">W</text>
+        <g><path class="track" d="M98 96 Q110 88 118 79"/><circle class="sat on" cx="118" cy="79" r="4.5"/></g>
+        <g><path class="track" d="M150 120 Q146 130 139 139"/><circle class="sat" cx="139" cy="139" r="4"/></g>
+        <g><path class="track" d="M88 146 Q80 140 74 131"/><circle class="sat" cx="74" cy="131" r="4"/></g>
+        <g><path class="track" d="M30 84 Q34 74 41 66"/><circle class="sat" cx="41" cy="66" r="4"/></g>
+        <g><path class="track" d="M178 70 Q177 79 174 87"/><circle class="sat" cx="174" cy="87" r="4"/></g>
+        <g><path class="track" d="M108 126 Q104 121 101 115"/><circle class="sat" cx="101" cy="115" r="4"/></g>
+      </svg>
+      <figcaption>A skyplot: each dot is a satellite, placed by compass direction and height above the horizon.</figcaption>
+    </figure>
+  </header>
+
+  <section aria-labelledby="research">
+    <h2 id="research">Research</h2>
+    <p>Satellite navigation signals are slowed slightly as they pass through the lower atmosphere, and part of that delay is caused by water vapor. If the delay can be recovered precisely, an ordinary GNSS receiver becomes a weather sensor.</p>
+    <p>In the UW Connect Lab, advised by Prof. Bhuvana Krishnaswamy and Prof. Parmesh Ramanathan, I built a simulation pipeline to test how well that delay can be measured: SignalSim generates the satellite signals, GNSS-SDR acts as the receiver, and RTKLIB solves for position and atmospheric delay.</p>
+    <ul class="points">
+      <li>Recovered an injected zenith tropospheric delay to within 2&nbsp;cm, confirmed the recovery stays linear across a sweep of injected values, and cross-checked against an EarthScope/GAGE reference station.</li>
+      <li>Ported the pipeline from L-band (1.5&nbsp;GHz) to Ku-band (12&nbsp;GHz), exploring whether broadband satellite downlinks could serve the same purpose.</li>
+      <li>Quantified the noise cost of dual-frequency ionosphere-free processing in simulation: ±255&nbsp;mm, against ±52&nbsp;mm for single-frequency.</li>
+    </ul>
+    <h3>Atmospheric Sensing Using Global Navigation Satellite Systems</h3>
+    <p class="meta">Poster, first author. ECE SPARK Symposium, UW–Madison, summer 2026.</p>
+    <p class="demo"><a href="ztd.html">Interactive demo: how a satellite’s elevation changes the atmospheric delay</a></p>
+  </section>
+
+  <section aria-labelledby="engineering">
+    <h2 id="engineering">Engineering</h2>
+
+    <h3>Badger Solar Racing</h3>
+    <p class="meta">Firmware team, since September 2025</p>
+    <p>Built the driver dashboard for the solar car — speed, turn signals, gear, and headlights — by decoding and encoding CAN messages from the vehicle’s components. Implemented cruise control to hold the car at its most energy-efficient speed.</p>
+
+    <h3>Keypad door lock</h3>
+    <p class="meta">RP2040, custom PCB</p>
+    <p>Designed a custom board integrating a keypad, LCD, and servo driver around the Raspberry Pi Pico, with password validation and servo actuation.</p>
+
+    <h3>Engineering Hall navigation</h3>
+    <p class="meta">Android, Kotlin</p>
+    <p>An indoor navigation app for Engineering Hall, with routing over a node graph using breadth-first search.</p>
+  </section>
+
+  <section aria-labelledby="honors">
+    <h2 id="honors">Honors</h2>
+    <dl class="honors">
+      <dt>ECE SPARK Summer Research Fellowship, inaugural cohort</dt><dd>2026</dd>
+      <dt>Tau Beta Pi, Wisconsin Alpha chapter</dt><dd>2026</dd>
+      <dt>Paul H. Thiele Scholarship, College of Engineering</dt><dd>2026</dd>
+      <dt>Dean’s List, College of Engineering</dt><dd>2025–26</dd>
+    </dl>
+  </section>
+
+</main>
+<footer>Updated October 2026</footer>
+</body>
+</html>

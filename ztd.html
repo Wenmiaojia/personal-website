@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tropospheric delay demo — Wenmiao Jia</title>
+<meta name="description" content="Interactive demo: how a GNSS satellite's elevation changes the delay its signal picks up in the lower atmosphere.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #F6F8FB; --ink: #18212E; --muted: #586476; --rule: #D9DFE7; --accent: #2B6A8A;
+    --signal: #B8650A; --sky-top: #D6E4F1; --sky-bot: #EEF3F8; --atmo: rgba(43, 106, 138, 0.15);
+    --ground: #C3CEDA; --stars: 0; --panel-line: #9FB0C3;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #0E1622; --ink: #E3E9F1; --muted: #97A4B5; --rule: #233042; --accent: #7DB6D3;
+      --signal: #F2B33D; --sky-top: #060E1B; --sky-bot: #12283F; --atmo: rgba(125, 182, 211, 0.14);
+      --ground: #2E3E52; --stars: 0.7; --panel-line: #4A5E77;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #0E1622; --ink: #E3E9F1; --muted: #97A4B5; --rule: #233042; --accent: #7DB6D3;
+    --signal: #F2B33D; --sky-top: #060E1B; --sky-bot: #12283F; --atmo: rgba(125, 182, 211, 0.14);
+    --ground: #2E3E52; --stars: 0.7; --panel-line: #4A5E77;
+    color-scheme: dark;
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--paper); color: var(--ink);
+    font-family: "Newsreader", Georgia, "Times New Roman", serif; font-size: 1.125rem; line-height: 1.65;
+    padding: env(safe-area-inset-top, 0px) 0 env(safe-area-inset-bottom, 0px);
+  }
+  main { max-width: 52rem; margin: 0 auto; padding: 3rem 1.5rem 3rem; }
+  a { color: var(--accent); text-decoration-thickness: 1px; text-underline-offset: 0.18em; }
+  a:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 2px; }
+  .back { font-size: 1rem; }
+  h1 { font-size: clamp(1.9rem, 5vw, 2.5rem); font-weight: 500; line-height: 1.15; margin: 1.5rem 0 0.75rem; letter-spacing: -0.01em; }
+  .intro { max-width: 40rem; margin: 0 0 2rem; }
+
+  .sky { width: 100%; height: auto; display: block; border-radius: 12px; border: 1px solid var(--rule); }
+  .sky .star { fill: var(--ink); opacity: var(--stars); }
+  .sky .atmo-label { fill: var(--muted); font: 500 12px "Instrument Sans", system-ui, sans-serif; }
+  .sky .elev-label { fill: var(--muted); font: italic 15px "Newsreader", Georgia, serif; }
+  .sky .ray-out { stroke: var(--panel-line); stroke-width: 1.5; stroke-dasharray: 6 6; }
+  .sky .ray-in { stroke: var(--signal); stroke-width: 3; stroke-linecap: round; stroke-dasharray: 3 4; }
+  .sky .arc { fill: none; stroke: var(--muted); stroke-width: 1.2; }
+  .sky .sat-body { fill: var(--ink); }
+  .sky .sat-panel { fill: var(--accent); }
+  .sky .antenna { stroke: var(--ink); stroke-width: 2; fill: none; stroke-linecap: round; }
+  .sky .pulse { fill: var(--signal); }
+
+  .controls {
+    display: grid; grid-template-columns: minmax(12rem, 1fr) auto; gap: 0.5rem 2rem; align-items: center;
+    margin-top: 1rem; font-family: "Instrument Sans", system-ui, sans-serif; font-size: 0.95rem;
+  }
+  .controls label { display: block; color: var(--muted); margin-bottom: 0.25rem; }
+  input[type="range"] { width: 100%; accent-color: var(--signal); }
+  .readout { display: flex; gap: 1.75rem; font-variant-numeric: tabular-nums; }
+  .readout div { display: flex; flex-direction: column; }
+  .readout span { color: var(--muted); font-size: 0.82rem; }
+  .readout output { font-size: 1.35rem; font-weight: 600; line-height: 1.2; }
+
+  section { border-top: 1px solid var(--rule); margin-top: 2.5rem; padding-top: 1.5rem; max-width: 40rem; }
+  h2 { font-size: 1.3rem; font-weight: 600; margin: 0 0 0.75rem; }
+  p { margin: 0 0 1rem; }
+  .note { color: var(--muted); font-size: 1rem; }
+
+  @media (max-width: 40rem) {
+    main { padding-top: 2rem; }
+    .controls { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <a class="back" href="index.html">Back to Wenmiao Jia</a>
+  <h1>How elevation changes tropospheric delay</h1>
+  <p class="intro">GNSS signals slow down slightly as they cross the lower atmosphere. Drag the satellite toward the horizon: the signal crosses more air, and the delay grows.</p>
+
+  <svg class="sky" viewBox="0 0 800 340" role="img" aria-labelledby="sky-title sky-desc">
+    <title id="sky-title">A GNSS signal travelling from a satellite to a ground receiver through the troposphere</title>
+    <desc id="sky-desc">As the satellite drops toward the horizon, its signal crosses more of the lower atmosphere and the delay grows.</desc>
+    <defs>
+      <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" style="stop-color: var(--sky-top)"/>
+        <stop offset="1" style="stop-color: var(--sky-bot)"/>
+      </linearGradient>
+      <linearGradient id="atmoGrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" style="stop-color: var(--atmo); stop-opacity: 0.2"/>
+        <stop offset="1" style="stop-color: var(--atmo); stop-opacity: 1"/>
+      </linearGradient>
+    </defs>
+    <rect width="800" height="340" fill="url(#skyGrad)"/>
+    <g aria-hidden="true">
+      <circle class="star" cx="62" cy="40" r="1.2"/><circle class="star" cx="138" cy="92" r="0.9"/>
+      <circle class="star" cx="244" cy="34" r="1.4"/><circle class="star" cx="318" cy="128" r="0.8"/>
+      <circle class="star" cx="402" cy="62" r="1.1"/><circle class="star" cx="498" cy="22" r="0.9"/>
+      <circle class="star" cx="566" cy="104" r="1.3"/><circle class="star" cx="642" cy="48" r="0.8"/>
+      <circle class="star" cx="724" cy="88" r="1.2"/><circle class="star" cx="760" cy="160" r="0.9"/>
+      <circle class="star" cx="36" cy="170" r="0.9"/><circle class="star" cx="206" cy="186" r="1"/>
+    </g>
+    <rect x="0" y="236" width="800" height="80" fill="url(#atmoGrad)"/>
+    <text class="atmo-label" x="24" y="258">Troposphere</text>
+    <rect x="0" y="306" width="800" height="34" style="fill: var(--ground)"/>
+    <line class="ray-out" id="rayOut"/>
+    <line class="ray-in" id="rayIn"/>
+    <path class="arc" id="arc"/>
+    <text class="elev-label" id="elevLabel">e</text>
+    <g id="sat">
+      <rect class="sat-panel" x="-21" y="-3.5" width="13" height="7" rx="1"/>
+      <rect class="sat-panel" x="8" y="-3.5" width="13" height="7" rx="1"/>
+      <rect class="sat-body" x="-6" y="-6" width="12" height="12" rx="2"/>
+    </g>
+    <g aria-hidden="true">
+      <path class="antenna" d="M151 306 L160 296 L169 306 M160 296 L160 288"/>
+      <circle cx="160" cy="287" r="3" style="fill: var(--ink)"/>
+    </g>
+    <circle class="pulse" id="pulse" r="4.5" opacity="0"/>
+  </svg>
+
+  <div class="controls">
+    <div>
+      <label for="elev">Satellite elevation</label>
+      <input type="range" id="elev" min="10" max="90" step="1" value="35" aria-describedby="delayOut">
+    </div>
+    <div class="readout" aria-live="polite">
+      <div><span>Elevation</span><output id="elevOut">35°</output></div>
+      <div><span>Slant delay</span><output id="delayOut">4.2 m</output></div>
+      <div><span>Path through air</span><output id="factorOut">1.74×</output></div>
+    </div>
+  </div>
+
+  <section>
+    <h2>What this shows</h2>
+    <p>Straight overhead, the lower atmosphere adds about 2.4&nbsp;m of apparent distance to a satellite signal. That’s the zenith tropospheric delay. Most of it comes from the dry gases in the air, and a smaller, highly variable part comes from water vapor — which is what makes the delay useful for weather forecasting.</p>
+    <p>A satellite lower in the sky sends its signal through more air, so the slant delay grows. My research recovers the zenith delay from many satellites at once and measures how accurately it can be estimated, in simulation, at both GPS frequencies (1.5&nbsp;GHz) and Ku-band (12&nbsp;GHz).</p>
+    <p class="note">Simplified geometry, using the basic 1/sin&nbsp;<i>e</i> mapping. Real processing uses more accurate mapping functions, especially near the horizon.</p>
+  </section>
+</main>
+
+<script>
+(function () {
+  const R = { x: 160, y: 287 };
+  const BAND = 236, TOP = 22, RIGHT = 776;
+  const ZTD = 2.4;
+  const $ = (id) => document.getElementById(id);
+  const rayOut = $("rayOut"), rayIn = $("rayIn"), arc = $("arc"), lbl = $("elevLabel");
+  const sat = $("sat"), pulse = $("pulse"), slider = $("elev");
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let geom = null, raf = null;
+
+  function compute(deg) {
+    const e = deg * Math.PI / 180, c = Math.cos(e), s = Math.sin(e);
+    let S;
+    const dTop = (R.y - TOP) / s, xTop = R.x + dTop * c;
+    if (xTop <= RIGHT) S = { x: xTop, y: TOP };
+    else { const d = (RIGHT - R.x) / c; S = { x: RIGHT, y: R.y - d * s }; }
+    const dB = (R.y - BAND) / s;
+    return { e, c, s, S, B: { x: R.x + dB * c, y: BAND } };
+  }
+  function set(el, a) { for (const k in a) el.setAttribute(k, a[k]); }
+  function draw(deg) {
+    geom = compute(deg);
+    const { e, c, s, S, B } = geom;
+    set(rayOut, { x1: S.x, y1: S.y, x2: B.x, y2: B.y });
+    set(rayIn, { x1: B.x, y1: B.y, x2: R.x, y2: R.y });
+    sat.setAttribute("transform", `translate(${S.x} ${S.y}) rotate(-18)`);
+    const r = 44;
+    set(arc, { d: `M ${R.x + r} ${R.y} A ${r} ${r} 0 0 0 ${R.x + r * c} ${R.y - r * s}` });
+    const h = e / 2;
+    set(lbl, { x: R.x + 58 * Math.cos(h) - 4, y: R.y - 58 * Math.sin(h) + 5 });
+    $("elevOut").textContent = `${deg}°`;
+    $("delayOut").textContent = `${(ZTD / s).toFixed(1)} m`;
+    $("factorOut").textContent = `${(1 / s).toFixed(2)}×`;
+  }
+  function fire() {
+    if (reduce || !geom) return;
+    cancelAnimationFrame(raf);
+    const { S, B } = geom;
+    const L1 = Math.hypot(S.x - B.x, S.y - B.y), L2 = Math.hypot(B.x - R.x, B.y - R.y);
+    const v = 560, t1 = L1 / v, t2 = L2 / (v * 0.38);
+    const t0 = performance.now();
+    pulse.setAttribute("opacity", "1");
+    function step(now) {
+      const t = (now - t0) / 1000;
+      let p;
+      if (t < t1) { const k = t / t1; p = { x: S.x + (B.x - S.x) * k, y: S.y + (B.y - S.y) * k }; }
+      else if (t < t1 + t2) { const k = (t - t1) / t2; p = { x: B.x + (R.x - B.x) * k, y: B.y + (R.y - B.y) * k }; }
+      else { pulse.setAttribute("opacity", "0"); return; }
+      set(pulse, { cx: p.x, cy: p.y });
+      raf = requestAnimationFrame(step);
+    }
+    raf = requestAnimationFrame(step);
+  }
+  slider.addEventListener("input", () => draw(+slider.value));
+  slider.addEventListener("change", fire);
+  draw(+slider.value);
+  setTimeout(fire, 400);
+})();
+</script>
+</body>
+</html>
