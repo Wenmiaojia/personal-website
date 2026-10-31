@@ -59,6 +59,7 @@
 
   /* Hero */
   .hero { display: grid; grid-template-columns: 1fr 11rem; gap: 2rem; align-items: center; }
+  .headshot { width: 11rem; height: 11rem; border-radius: 50%; object-fit: cover; display: block; border: 1px solid var(--rule); }
   h1 {
     font-size: clamp(2.5rem, 7vw, 3.5rem);
     font-weight: 500;
@@ -92,6 +93,9 @@
   ul.points li::marker { color: var(--muted); }
   .demo { margin-top: 1.25rem; }
 
+  dl.news { margin: 0; display: grid; grid-template-columns: 7.5rem 1fr; gap: 0.6rem 1.25rem; }
+  dl.news dt { margin: 0; color: var(--muted); font-variant-numeric: tabular-nums; }
+  dl.news dd { margin: 0; }
   dl.honors { margin: 0; display: grid; grid-template-columns: 1fr auto; gap: 0.55rem 1.5rem; }
   dl.honors dt { margin: 0; }
   dl.honors dd { margin: 0; color: var(--muted); font-variant-numeric: tabular-nums; }
@@ -101,7 +105,7 @@
   @media (max-width: 40rem) {
     main { padding-top: 3rem; }
     .hero { grid-template-columns: 1fr; }
-    .hero figure { order: -1; width: 9rem; }
+    .headshot { order: -1; width: 8rem; height: 8rem; }
   }
 
   /* One orchestrated moment: satellite tracks draw in on load */
@@ -134,28 +138,17 @@
         <li><a href="cv.pdf">CV</a></li>
       </ul>
     </div>
-    <figure>
-      <svg class="skyplot" viewBox="0 0 200 200" role="img" aria-labelledby="skyplot-title">
-        <title id="skyplot-title">A GNSS skyplot showing six satellites by direction and elevation</title>
-        <circle class="ring" cx="100" cy="100" r="90"/>
-        <circle class="ring" cx="100" cy="100" r="60"/>
-        <circle class="ring" cx="100" cy="100" r="30"/>
-        <line class="axis" x1="100" y1="10" x2="100" y2="190"/>
-        <line class="axis" x1="10" y1="100" x2="190" y2="100"/>
-        <text class="card" x="100" y="7" text-anchor="middle">N</text>
-        <text class="card" x="196" y="103.5" text-anchor="middle">E</text>
-        <text class="card" x="100" y="199" text-anchor="middle">S</text>
-        <text class="card" x="4" y="103.5" text-anchor="middle">W</text>
-        <g><path class="track" d="M98 96 Q110 88 118 79"/><circle class="sat on" cx="118" cy="79" r="4.5"/></g>
-        <g><path class="track" d="M150 120 Q146 130 139 139"/><circle class="sat" cx="139" cy="139" r="4"/></g>
-        <g><path class="track" d="M88 146 Q80 140 74 131"/><circle class="sat" cx="74" cy="131" r="4"/></g>
-        <g><path class="track" d="M30 84 Q34 74 41 66"/><circle class="sat" cx="41" cy="66" r="4"/></g>
-        <g><path class="track" d="M178 70 Q177 79 174 87"/><circle class="sat" cx="174" cy="87" r="4"/></g>
-        <g><path class="track" d="M108 126 Q104 121 101 115"/><circle class="sat" cx="101" cy="115" r="4"/></g>
-      </svg>
-      <figcaption>A skyplot: each dot is a satellite, placed by compass direction and height above the horizon.</figcaption>
-    </figure>
+    <img class="headshot" src="headshot.jpg" alt="Wenmiao Jia" width="176" height="176">
   </header>
+
+  <section aria-labelledby="news">
+    <h2 id="news">News</h2>
+    <dl class="news">
+      <dt>Oct 2026</dt><dd>Inducted into Tau Beta Pi, the engineering honor society.</dd>
+      <dt>Oct 2026</dt><dd>Received the Paul H. Thiele Scholarship from the College of Engineering.</dd>
+      <dt>Summer 2026</dt><dd>Presented a first-author poster at the inaugural ECE SPARK Symposium. <a href="spark-poster.pdf">View poster</a></dd>
+    </dl>
+  </section>
 
   <section aria-labelledby="research">
     <h2 id="research">Research</h2>
@@ -166,8 +159,8 @@
       <li>Ported the pipeline from L-band (1.5&nbsp;GHz) to Ku-band (12&nbsp;GHz), exploring whether broadband satellite downlinks could serve the same purpose.</li>
       <li>Quantified the noise cost of dual-frequency ionosphere-free processing in simulation: ±255&nbsp;mm, against ±52&nbsp;mm for single-frequency.</li>
     </ul>
-    <h3>Atmospheric Sensing Using Global Navigation Satellite Systems</h3>
-    <p class="meta">Poster, first author. ECE SPARK Symposium, UW–Madison, summer 2026.</p>
+    <h3>Atmospheric Sensing Using Global Navigation Satellite System</h3>
+    <p class="meta">Poster, first author. ECE SPARK Symposium, UW–Madison, summer 2026. <a href="spark-poster.pdf">View poster (PDF)</a></p>
     <p class="demo"><a href="ztd.html">Interactive demo: how a satellite’s elevation changes the atmospheric delay</a></p>
   </section>
 
